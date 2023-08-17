@@ -85,10 +85,25 @@ add_action('woocommerce_before_add_to_cart_button', 'hm_wcdon_before_add_to_cart
 function hm_wcdon_before_add_to_cart_button() {
 	global $product;
 	if ($product->get_type() == 'donation') {
-		echo('<div class="wc-donation-amount">
-				<label for="donation_amount_field">'.esc_html__('Your price', 'donations-for-woocommerce').':</label>
-				<input type="number" name="donation_amount" id="donation_amount_field" size="5" max="' . $product->get_donation_max_amount() . '" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format($product->get_price(), 2, '.', '').'" class="input-text text" />
-			</div>');
+		
+		echo(
+			'<div class="range-container">
+				<label id="donation_amount_label" for="donation_amount_field">Your donation: <strong>' . get_woocommerce_currency_symbol() . number_format($product->get_price(), 2, '.', '')  . '</strong></label>
+			  	<input id="donation_amount_field" name="donation_amount" type="range" size="5" max="' . $product->get_donation_max_amount() . '" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format($product->get_price(), 2, '.', '').'" class="input-text text">
+			</div>
+			<script>
+			const range = document.getElementById("donation_amount_field");
+			
+			const currencySymbol = "' . get_woocommerce_currency_symbol() . '";
+			
+			range.addEventListener("input", (e) => {
+			  const value = +e.target.value;
+			  const label = e.target.previousElementSibling;
+			  
+			  label.innerHTML = "Your donation: <strong>" + currencySymbol + parseFloat(value).toFixed(2) + "</strong>";
+			});
+			</script>'
+		);
 	}
 }
 

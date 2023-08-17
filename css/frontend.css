@@ -4,3 +4,68 @@
 .wc-donation-amount input {
 	max-width: 120px;
 }
+
+.range-container {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+#donation_amount_field {
+	width: 300px;
+	margin: 18px 0;
+	-webkit-appearance: none;
+	border: none;
+}
+
+#donation_amount_field:focus {
+	outline: none;
+}
+
+#donation_amount_label {
+	color: var(--black);
+    font-size: 19px;
+    font-family: Gotham;
+    font-weight: 400;
+    line-height: 2rem;
+}
+
+/* Chrome & Safari */
+#donation_amount_field::-webkit-slider-runnable-track {
+	background: var(--primary);
+	border-radius: 4px;
+	width: 100%;
+	height: 10px;
+	cursor: pointer;
+}
+
+#donation_amount_field::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	height: 24px;
+	width: 24px;
+	background: #fff;
+	border-radius: 50%;
+	border: 2px solid var(--primary);
+	margin-top: -7px;
+	cursor: pointer;
+}
+
+/* Firefox */
+#donation_amount_field::-moz-range-track {
+	background: var(--primary);
+	border-radius: 4px;
+	width: 100%;
+	height: 14px;
+	cursor: pointer;
+}
+
+#donation_amount_field::-moz-range-thumb {
+	-webkit-appearance: none;
+	height: 24px;
+	width: 24px;
+	background: #fff;
+	border-radius: 50%;
+	border: 1px solid var(--primary);
+	margin-top: -7px;
+	cursor: pointer;
+}
