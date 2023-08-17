@@ -44,54 +44,54 @@
 */
 
 // Add Instructions link in plugins list
-add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'hm_wcdon_action_links');
-function hm_wcdon_action_links($links) {
-	array_unshift($links, '<a href="'.esc_url(get_admin_url(null, 'admin.php?page=hm_wcdon')).'">'.esc_html__('Instructions & Settings', 'donations-for-woocommerce').'</a>');
+add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'hm_wcdon_action_links' );
+function hm_wcdon_action_links( $links ) {
+	array_unshift( $links, '<a href="'.esc_url( get_admin_url( null, 'admin.php?page=hm_wcdon' ) ).'">'.esc_html__( 'Instructions & Settings', 'donations-for-woocommerce' ).'</a>' );
 	return $links;
 }
 
 // Add admin page
-add_action('admin_menu', 'hm_wcdon_admin_menu');
+add_action( 'admin_menu', 'hm_wcdon_admin_menu' );
 function hm_wcdon_admin_menu() {
-	add_submenu_page('woocommerce', esc_html__('Donations for WooCommerce', 'donations-for-woocommerce'), esc_html__('Donations Settings', 'donations-for-woocommerce'), 'manage_woocommerce', 'hm_wcdon', 'hm_wcdon_admin_page');
+	add_submenu_page( 'woocommerce', esc_html__( 'Donations for WooCommerce', 'donations-for-woocommerce' ), esc_html__( 'Donations Settings', 'donations-for-woocommerce' ), 'manage_woocommerce', 'hm_wcdon', 'hm_wcdon_admin_page' );
 }
 
 // Display admin page
 function hm_wcdon_admin_page() {
-	if (!empty($_POST['save'])) {
-		check_admin_referer('hm_wcdon_settings');
-		$checkboxFields = array('disable_cart_amount_field');
-		foreach ($checkboxFields as $cbField) {
-			$_POST[$cbField] = (empty($_POST[$cbField]) ? 0 : 1);
+	if ( !empty( $_POST['save'] ) ) {
+		check_admin_referer( 'hm_wcdon_settings' );
+		$checkboxFields = array( 'disable_cart_amount_field' );
+		foreach ( $checkboxFields as $cbField ) {
+			$_POST[$cbField] = ( empty( $_POST[$cbField] ) ? 0 : 1 );
 		}
-		hm_wcdon_set_options($_POST);
-		echo('<div class="notice notice-success"><p>'.esc_html__('The settings have been saved.', 'donations-for-woocommerce').'</p></div>');
+		hm_wcdon_set_options( $_POST );
+		echo( '<div class="notice notice-success"><p>'.esc_html__( 'The settings have been saved.', 'donations-for-woocommerce' ).'</p></div>' );
 	}
 
-	include(dirname(__FILE__).'/admin.php');
+	include( dirname(__FILE__).'/admin.php' );
 }
 
 // Disable price display in frontend for Donation products
-add_filter('woocommerce_get_price_html', 'hm_wcdon_get_price_html', 10, 2);
-function hm_wcdon_get_price_html($price, $product) {
-	if ($product->get_type() == 'donation')
-		return (is_admin() ? 'Variable' : '');
+add_filter( 'woocommerce_get_price_html', 'hm_wcdon_get_price_html', 10, 2 );
+function hm_wcdon_get_price_html( $price, $product ) {
+	if ( $product->get_type() == 'donation' )
+		return ( is_admin() ? 'Variable' : '' );
 	else
 		return $price;
 }
 
 // Add fields to the front end of the product page
-add_action('woocommerce_before_add_to_cart_button', 'hm_wcdon_before_add_to_cart_button');
+add_action( 'woocommerce_before_add_to_cart_button', 'hm_wcdon_before_add_to_cart_button' );
 function hm_wcdon_before_add_to_cart_button() {
 	global $product;
-	if ($product->get_type() == 'donation') {
+	if ( $product->get_type() == 'donation' ) {
 		
-		echo('<div class="range-container">
-				<label id="donation_amount_label" for="donation_amount_field">Your donation: <strong>' . get_woocommerce_currency_symbol() . number_format($product->get_price(), 2, '.', '')  . '</strong></label>
-			  	<input id="donation_amount_field" name="donation_amount" type="range" size="5" max="' . $product->get_donation_max_amount() . '" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format($product->get_price(), 2, '.', '').'" class="input-text text">
+		echo( '<div class="range-container">
+				<label id="donation_amount_label" for="donation_amount_field">Your donation: <strong>' . get_woocommerce_currency_symbol() . number_format( $product->get_price(), 2, '.', '' )  . '</strong></label>
+			  	<input id="donation_amount_field" name="donation_amount" type="range" size="5" max="' . $product->get_donation_max_amount() . '" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format( $product->get_price(), 2, '.', '' ).'" class="input-text text">
 			</div>
 			<script>
-			const range = document.getElementById("donation_amount_field");
+			const range = document.querySelector("#donation_amount_field");
 			
 			const currencySymbol = "' . get_woocommerce_currency_symbol() . '";
 			
@@ -103,21 +103,22 @@ function hm_wcdon_before_add_to_cart_button() {
 			});
 			</script>'
 		);
+
 	}
 }
 
 // Add Donation product type option
-add_filter('product_type_selector', 'hm_wcdon_product_type_selector');
-function hm_wcdon_product_type_selector($productTypes) {
+add_filter( 'product_type_selector', 'hm_wcdon_product_type_selector' );
+function hm_wcdon_product_type_selector( $productTypes ) {
 	$productTypes['donation'] = 'Donation';
 	return $productTypes;
 }
 
 // Show all product data tabs for Donation products
-add_filter('woocommerce_product_data_tabs', 'hm_wcdon_product_data_tabs', 10, 1);
-function hm_wcdon_product_data_tabs($tabs) {
-	foreach ($tabs as $tabId => $tabData) {
-		if ($tabId != 'general' && $tabId != 'advanced' && $tabId != 'attribute' && $tabId != 'shipping') {
+add_filter( 'woocommerce_product_data_tabs', 'hm_wcdon_product_data_tabs', 10, 1 );
+function hm_wcdon_product_data_tabs( $tabs ) {
+	foreach ( $tabs as $tabId => $tabData ) {
+		if ( $tabId != 'general' && $tabId != 'advanced' && $tabId != 'attribute' && $tabId != 'shipping' ) {
 			$tabs[$tabId]['class'][] = 'show_if_donation';
 		}
 	}
@@ -125,19 +126,19 @@ function hm_wcdon_product_data_tabs($tabs) {
 }
 
 // Create the WC_Product_Donation class
-add_filter('plugins_loaded', 'hm_wcdon_plugins_loaded');
+add_filter( 'plugins_loaded', 'hm_wcdon_plugins_loaded' );
 function hm_wcdon_plugins_loaded() {
 	// Load translations - based on the example on the WordPress Codex, e.g. https://codex.wordpress.org/Function_Reference/load_plugin_textdomain and others
-	load_plugin_textdomain('donations-for-woocommerce', false, basename(dirname(__FILE__)).'/lang');
+	load_plugin_textdomain( 'donations-for-woocommerce', false, basename( dirname( __FILE__ ) ).'/lang' );
 	
 	// Create Donation product
-	if (class_exists('WC_Product_Simple')) {
+	if ( class_exists( 'WC_Product_Simple' ) ) {
 		class WC_Product_Donation extends WC_Product_Simple {
 			private $donationAmount = 0, $donationAmountIncrement;
 			private $donationMin    = 0, $donationMinAmount;
 			private $donationMax    = 0, $donationMaxAmount;
-			function __construct($product) {
-				parent::__construct($product);
+			function __construct( $product ) {
+				parent::__construct( $product );
 				$this->product_type = 'donation';
 			}
 			function get_type() {
@@ -146,9 +147,9 @@ function hm_wcdon_plugins_loaded() {
 
 			// Get increment value (default to £1 if empty)
 			function get_donation_amount_increment() {
-				if (!isset($this->donationAmountIncrement)) {
-					$this->donationAmountIncrement = get_post_meta($this->get_id(), '_donation_amount_increment', true);
-					if (empty($this->donationAmountIncrement)) {
+				if ( !isset( $this->donationAmountIncrement ) ) {
+					$this->donationAmountIncrement = get_post_meta( $this->get_id(), '_donation_amount_increment', true );
+					if ( empty( $this->donationAmountIncrement ) ) {
 						$this->donationAmountIncrement = 1.00;
 					}
 				}
@@ -157,10 +158,10 @@ function hm_wcdon_plugins_loaded() {
 
 			// Get minimum price (default to product price if empty)
 			function get_donation_min_amount() {
-				if (!isset($this->donationMinAmount)) {
-					$this->donationMinAmount = get_post_meta($this->get_id(), '_donation_min_amount', true);
-					if (empty($this->donationMinAmount)) {
-						$this->donationMinAmount = get_post_meta($this->get_id(), '_price', true);
+				if ( ! isset( $this->donationMinAmount ) ) {
+					$this->donationMinAmount = get_post_meta( $this->get_id(), '_donation_min_amount', true );
+					if ( empty( $this->donationMinAmount ) ) {
+						$this->donationMinAmount = get_post_meta( $this->get_id(), '_price', true );
 					}
 				}
 				return $this->donationMinAmount;
@@ -168,93 +169,92 @@ function hm_wcdon_plugins_loaded() {
 
 			// Get maximum price (default to £50 if empty)
 			function get_donation_max_amount() {
-				if (!isset($this->donationMaxAmount)) {
-					$this->donationMaxAmount = get_post_meta($this->get_id(), '_donation_max_amount', true);
-					if (empty($this->donationMaxAmount)) {
+				if ( !isset( $this->donationMaxAmount ) ) {
+					$this->donationMaxAmount = get_post_meta( $this->get_id(), '_donation_max_amount', true );
+					if ( empty( $this->donationMaxAmount ) ) {
 						$this->donationMaxAmount = 50.00;
 					}
 				}
 				return $this->donationMaxAmount;
 			}
-			function is_taxable() { return (bool) hm_wcdon_get_option('show_tax_donation_product'); }
-			function needs_shipping() { return (bool) hm_wcdon_get_option('show_shipping_donation_product'); }
-			function is_virtual() { return !( hm_wcdon_get_option('show_shipping_donation_product') ); }
-			function add_to_cart_url() { return get_permalink($this->id); }
+			function is_taxable() { return (bool) hm_wcdon_get_option( 'show_tax_donation_product' ); }
+			function needs_shipping() { return (bool) hm_wcdon_get_option( 'show_shipping_donation_product' ); }
+			function is_virtual() { return !( hm_wcdon_get_option( 'show_shipping_donation_product' ) ); }
+			function add_to_cart_url() { return get_permalink( $this->id ); }
 		}
 	}
 }
 
 // Disable AJAX add to cart for Donation products
-add_filter('woocommerce_loop_add_to_cart_link', 'hm_wcdon_add_to_cart_link', 10, 2);
-function hm_wcdon_add_to_cart_link($linkHtml, $product) {
-	return ($product->get_type() == 'donation' ? str_replace('ajax_add_to_cart', '', $linkHtml) : $linkHtml);
+add_filter( 'woocommerce_loop_add_to_cart_link', 'hm_wcdon_add_to_cart_link', 10, 2 );
+function hm_wcdon_add_to_cart_link( $linkHtml, $product ) {
+	return ( $product->get_type() == 'donation' ? str_replace( 'ajax_add_to_cart', '', $linkHtml ) : $linkHtml );
 }
 
-
 // Add fields to the General product data tab
-add_filter('woocommerce_product_options_general_product_data', 'hm_wcdon_product_options_general');
+add_filter( 'woocommerce_product_options_general_product_data', 'hm_wcdon_product_options_general' );
 function hm_wcdon_product_options_general() {
 	global $thepostid;
-	echo('<div class="options_group show_if_donation">');
-	woocommerce_wp_text_input(array('id' => 'donation_default_amount', 'label' => esc_html__('Default amount (£)', 'donations-for-woocommerce'), 'value' => get_post_meta($thepostid, '_price', true), 'data_type' => 'price'));
+	echo( '<div class="options_group show_if_donation">' );
+	woocommerce_wp_text_input( array( 'id' => 'donation_default_amount', 'label' => esc_html__( 'Default amount (£)', 'donations-for-woocommerce' ), 'value' => get_post_meta( $thepostid, '_price', true ), 'data_type' => 'price' ) );
 
 	// Add increment field to backend
-	$donationAmountIncrement = get_post_meta($thepostid, '_donation_amount_increment', true);
-	woocommerce_wp_text_input(array('id' => 'donation_amount_increment', 'label' => esc_html__('Amount increment (£)', 'donations-for-woocommerce'), 'value' => (empty($donationAmountIncrement) ? 1.00 : $donationAmountIncrement), 'data_type' => 'decimal'));
+	$donationAmountIncrement = get_post_meta( $thepostid, '_donation_amount_increment', true );
+	woocommerce_wp_text_input( array( 'id' => 'donation_amount_increment', 'label' => esc_html__( 'Amount increment (£)', 'donations-for-woocommerce' ), 'value' => ( empty( $donationAmountIncrement ) ? 1.00 : $donationAmountIncrement ), 'data_type' => 'decimal' ) );
 	
 	// Add minimum price field to backend
-	$donationMinAmount = get_post_meta($thepostid, '_donation_min_amount', true);
-	woocommerce_wp_text_input(array('id' => 'donation_min_amount', 'label' => esc_html__('Min amount (£)', 'donations-for-woocommerce'), 'value' => (empty($donationMinAmount) ? get_post_meta($thepostid, '_price', true) : $donationMinAmount), 'data_type' => 'decimal'));
+	$donationMinAmount = get_post_meta( $thepostid, '_donation_min_amount', true );
+	woocommerce_wp_text_input( array( 'id' => 'donation_min_amount', 'label' => esc_html__( 'Min amount (£)', 'donations-for-woocommerce' ), 'value' => ( empty( $donationMinAmount ) ? get_post_meta( $thepostid, '_price', true ) : $donationMinAmount ), 'data_type' => 'decimal' ) );
 	
 	// Add maximum price field to backend
-	$donationMaxAmount = get_post_meta($thepostid, '_donation_max_amount', true);
-	woocommerce_wp_text_input(array('id' => 'donation_max_amount', 'label' => esc_html__('Max amount (£)', 'donations-for-woocommerce'), 'value' => (empty($donationMaxAmount) ? 50.00 : $donationMaxAmount), 'data_type' => 'decimal'));
-	echo('</div>');
+	$donationMaxAmount = get_post_meta( $thepostid, '_donation_max_amount', true );
+	woocommerce_wp_text_input( array( 'id' => 'donation_max_amount', 'label' => esc_html__( 'Max amount (£)', 'donations-for-woocommerce' ), 'value' => ( empty( $donationMaxAmount ) ? 50.00 : $donationMaxAmount ), 'data_type' => 'decimal' ) );
+	echo( '</div>' );
 }
 
 // Save donation product meta
-add_action('woocommerce_process_product_meta_donation', 'hm_wcdon_process_product_meta');
-function hm_wcdon_process_product_meta($productId) {
-	$price = ($_POST['donation_default_amount'] === '') ? '' : wc_format_decimal($_POST['donation_default_amount']);
-	update_post_meta($productId, '_price', $price);
-	update_post_meta($productId, '_regular_price', $price);
-	update_post_meta($productId, '_donation_amount_increment', (!empty($_POST['donation_amount_increment']) && is_numeric($_POST['donation_amount_increment']) ? number_format($_POST['donation_amount_increment'], 2, '.', '') : 1.00));
-	update_post_meta($productId, '_donation_min_amount', (!empty($_POST['donation_min_amount']) && is_numeric($_POST['donation_min_amount']) ? number_format($_POST['donation_min_amount'], 2, '.', '') : get_post_meta($productId, '_price', true)));
-	update_post_meta($productId, '_donation_max_amount', (!empty($_POST['donation_max_amount']) && is_numeric($_POST['donation_max_amount']) ? number_format($_POST['donation_max_amount'], 2, '.', '') : 50.00));
+add_action( 'woocommerce_process_product_meta_donation', 'hm_wcdon_process_product_meta' );
+function hm_wcdon_process_product_meta( $productId ) {
+	$price = ( $_POST['donation_default_amount'] === '' ) ? '' : wc_format_decimal( $_POST['donation_default_amount'] );
+	update_post_meta( $productId, '_price', $price );
+	update_post_meta( $productId, '_regular_price', $price );
+	update_post_meta( $productId, '_donation_amount_increment', ( ! empty( $_POST['donation_amount_increment'] ) && is_numeric( $_POST['donation_amount_increment'] ) ? number_format( $_POST['donation_amount_increment'], 2, '.', '' ) : 1.00 ) );
+	update_post_meta( $productId, '_donation_min_amount', ( ! empty( $_POST['donation_min_amount'] ) && is_numeric( $_POST['donation_min_amount'] ) ? number_format( $_POST['donation_min_amount'], 2, '.', '' ) : get_post_meta( $productId, '_price', true ) ) );
+	update_post_meta( $productId, '_donation_max_amount', ( ! empty( $_POST['donation_max_amount'] ) && is_numeric( $_POST['donation_max_amount'] ) ? number_format( $_POST['donation_max_amount'], 2, '.', '' ) : 50.00 ) );
 }
 
 // Process donation amount when a Donation product is added to the cart
-add_filter('woocommerce_add_cart_item', 'hm_wcdon_add_cart_item');
-function hm_wcdon_add_cart_item($item) {
-	if ($item['data']->get_type() == 'donation') {
-		if (isset($_POST['donation_amount']) && is_numeric($_POST['donation_amount']) && $_POST['donation_amount'] >= 0)
+add_filter( 'woocommerce_add_cart_item', 'hm_wcdon_add_cart_item' );
+function hm_wcdon_add_cart_item( $item ) {
+	if ( $item['data']->get_type() == 'donation' ) {
+		if ( isset( $_POST['donation_amount'] ) && is_numeric( $_POST['donation_amount'] ) && $_POST['donation_amount'] >= 0 )
 			$item['donation_amount'] = $_POST['donation_amount']*1;
-		$item['data']->set_price($item['donation_amount']);
+		$item['data']->set_price( $item['donation_amount'] );
 	}
 	return $item;
 }
 
 // Use the Simple product type's add to cart button for Donation products
-add_action('woocommerce_donation_add_to_cart', 'hm_wcdon_add_to_cart_template');
+add_action( 'woocommerce_donation_add_to_cart', 'hm_wcdon_add_to_cart_template' );
 function hm_wcdon_add_to_cart_template() {
-	do_action('woocommerce_simple_add_to_cart');
+	do_action( 'woocommerce_simple_add_to_cart' );
 }
 
 // Set Donation product price when loading the cart
-add_filter('woocommerce_get_cart_item_from_session', 'hm_wcdon_get_cart_item_from_session');
-function hm_wcdon_get_cart_item_from_session($session_data) {
-	if ($session_data['data']->get_type() == 'donation' && isset($session_data['donation_amount']))
-			$session_data['data']->set_price($session_data['donation_amount']);
+add_filter( 'woocommerce_get_cart_item_from_session', 'hm_wcdon_get_cart_item_from_session' );
+function hm_wcdon_get_cart_item_from_session( $session_data ) {
+	if ( $session_data['data']->get_type() == 'donation' && isset( $session_data['donation_amount'] ) )
+			$session_data['data']->set_price( $session_data['donation_amount'] );
 	return $session_data;
 }
 
 // Get default plugin options
 function hm_wcdon_default_options() {
 	global $hm_wcdon_default_options;
-	if (!isset($hm_wcdon_default_options)) {
+	if ( !isset( $hm_wcdon_default_options ) ) {
 		$hm_wcdon_default_options = array(
-			'disable_cart_amount_field' => 0,
-            'show_tax_donation_product' => 0,
+			'disable_cart_amount_field' 	 => 0,
+            'show_tax_donation_product' 	 => 0,
             'show_shipping_donation_product' => 0
 		);
 	}
@@ -262,36 +262,36 @@ function hm_wcdon_default_options() {
 }
 
 // Retrieve plugin options
-function hm_wcdon_get_option($option) {
+function hm_wcdon_get_option( $option ) {
 	global $hm_wcdon_options;
-	if (!isset($hm_wcdon_options)) {
-		$hm_wcdon_options = array_merge(hm_wcdon_default_options(), get_option('hm_wcdon_options', array()));
+	if ( !isset( $hm_wcdon_options ) ) {
+		$hm_wcdon_options = array_merge( hm_wcdon_default_options(), get_option( 'hm_wcdon_options', array() ) );
 	}
-	return (isset($hm_wcdon_options[$option]) ? $hm_wcdon_options[$option] : null);
+	return ( isset( $hm_wcdon_options[$option] ) ? $hm_wcdon_options[$option] : null );
 }
 
 // Save plugin options
-function hm_wcdon_set_options($options) {
+function hm_wcdon_set_options( $options ) {
 	$defaultOptions = hm_wcdon_default_options();
-	return update_option('hm_wcdon_options', array_merge($defaultOptions, array_intersect_key($options, $defaultOptions)), false);
+	return update_option( 'hm_wcdon_options', array_merge( $defaultOptions, array_intersect_key( $options, $defaultOptions ) ), false );
 }
 
 // Add stylesheet to frontend
 function hm_wcdon_enqueue_scripts() {
-	wp_enqueue_style('hm-wcdon-frontend-styles', plugins_url('css/frontend.css', __FILE__));
+	wp_enqueue_style( 'hm-wcdon-frontend-styles', plugins_url( 'css/frontend.css', __FILE__ ) );
 }
-add_action('wp_enqueue_scripts', 'hm_wcdon_enqueue_scripts');
+add_action( 'wp_enqueue_scripts', 'hm_wcdon_enqueue_scripts' );
 
 // Show taxes options
 function hm_variable_donation_admin_custom_js() {
 
     global $pagenow, $typenow;
-    if ( isset($pagenow) && $pagenow == 'post.php' && isset($typenow) && $typenow == 'product' )   {
+    if ( isset( $pagenow ) && $pagenow == 'post.php' && isset( $typenow ) && $typenow == 'product' ) {
     ?>
     <script type='text/javascript'>
 
         jQuery(document).ready( function () {
-            <?php  if ( hm_wcdon_get_option('show_tax_donation_product' )) { ?>
+            <?php  if ( hm_wcdon_get_option( 'show_tax_donation_product' ) ) { ?>
             jQuery('#general_product_data ._tax_status_field').parent().addClass('show_if_donation').show();
             <?php } ?>
             jQuery('#woocommerce-product-data .type_box label[for=_downloadable].tips').addClass('show_if_donation').show();
@@ -302,6 +302,6 @@ function hm_variable_donation_admin_custom_js() {
     }
 }
 
-add_action('admin_footer', 'hm_variable_donation_admin_custom_js');
+add_action( 'admin_footer', 'hm_variable_donation_admin_custom_js' );
 
 ?>
