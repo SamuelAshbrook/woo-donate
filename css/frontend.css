@@ -65,7 +65,7 @@
 	width: 24px;
 	background: #fff;
 	border-radius: 50%;
-	border: 1px solid var(--primary);
+	border: 2px solid var(--primary);
 	margin-top: -7px;
 	cursor: pointer;
 }

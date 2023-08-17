@@ -8,18 +8,7 @@ echo('
 		<form action="" method="post">');
 		wp_nonce_field('hm_wcdon_settings');
 		echo('<input type="hidden" name="save" value="1" />
-			<table class="form-table" style="margin-bottom: 30px;">
-				<tr valign="top">
-					<th scope="row">
-						<label>'.esc_html__('Checkout', 'donations-for-woocommerce').':</label>
-					</th>
-					<td>
-						<label>
-							<input type="checkbox" name="disable_cart_amount_field"'.(hm_wcdon_get_option('disable_cart_amount_field') ? ' checked="checked"' : '').' />
-							'.esc_html__('Disable donation amount field in cart', 'donations-for-woocommerce').'
-						</label>
-					</td>
-				</tr>				
+			<table class="form-table" style="margin-bottom: 30px;">				
 				<tr valign="top">
 					<th scope="row">
 						<label>'.esc_html__('Taxes', 'donations-for-woocommerce').':</label>
@@ -51,7 +40,6 @@ echo('
 		</form>
 ');
 $potent_slug = 'donations-for-woocommerce';
-include(__DIR__.'/plugin-credit.php');
 echo('
 	</div>
 ');
