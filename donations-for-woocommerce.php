@@ -86,8 +86,8 @@ function hm_wcdon_before_add_to_cart_button() {
 	global $product;
 	if ($product->get_type() == 'donation') {
 		echo('<div class="wc-donation-amount">
-				<label for="donation_amount_field">'.esc_html__('Amount', 'donations-for-woocommerce').':</label>
-				<input type="number" name="donation_amount" id="donation_amount_field" size="5" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format($product->get_price(), 2, '.', '').'" class="input-text text" />
+				<label for="donation_amount_field">'.esc_html__('Your price', 'donations-for-woocommerce').':</label>
+				<input type="number" name="donation_amount" id="donation_amount_field" size="5" max="' . $product->get_donation_max_amount() . '" min="' . $product->get_donation_min_amount() . '" step="'.$product->get_donation_amount_increment().'" value="'.number_format($product->get_price(), 2, '.', '').'" class="input-text text" />
 			</div>');
 	}
 }
@@ -121,6 +121,7 @@ function hm_wcdon_plugins_loaded() {
 		class WC_Product_Donation extends WC_Product_Simple {
 			private $donationAmount = 0, $donationAmountIncrement;
 			private $donationMin    = 0, $donationMinAmount;
+			private $donationMax    = 0, $donationMaxAmount;
 			function __construct($product) {
 				parent::__construct($product);
 				$this->product_type = 'donation';
@@ -146,6 +147,15 @@ function hm_wcdon_plugins_loaded() {
 				}
 				return $this->donationMinAmount;
 			}
+			function get_donation_max_amount() {
+				if (!isset($this->donationMaxAmount)) {
+					$this->donationMaxAmount = get_post_meta($this->get_id(), '_donation_max_amount', true);
+					if (empty($this->donationMaxAmount)) {
+						$this->donationMaxAmount = 50.00;
+					}
+				}
+				return $this->donationMaxAmount;
+			}
 			function is_taxable() { return (bool) hm_wcdon_get_option('show_tax_donation_product'); }
 			function needs_shipping() { return (bool) hm_wcdon_get_option('show_shipping_donation_product'); }
 			function is_virtual() { return !( hm_wcdon_get_option('show_shipping_donation_product') ); }
@@ -166,11 +176,13 @@ add_filter('woocommerce_product_options_general_product_data', 'hm_wcdon_product
 function hm_wcdon_product_options_general() {
 	global $thepostid;
 	echo('<div class="options_group show_if_donation">');
-	woocommerce_wp_text_input(array('id' => 'donation_default_amount', 'label' => esc_html__('Default amount', 'donations-for-woocommerce'), 'value' => get_post_meta($thepostid, '_price', true), 'data_type' => 'price'));
+	woocommerce_wp_text_input(array('id' => 'donation_default_amount', 'label' => esc_html__('Default amount (£)', 'donations-for-woocommerce'), 'value' => get_post_meta($thepostid, '_price', true), 'data_type' => 'price'));
 	$donationAmountIncrement = get_post_meta($thepostid, '_donation_amount_increment', true);
-	woocommerce_wp_text_input(array('id' => 'donation_amount_increment', 'label' => esc_html__('Amount increment', 'donations-for-woocommerce'), 'value' => (empty($donationAmountIncrement) ? 0.01 : $donationAmountIncrement), 'data_type' => 'decimal'));
+	woocommerce_wp_text_input(array('id' => 'donation_amount_increment', 'label' => esc_html__('Amount increment (£)', 'donations-for-woocommerce'), 'value' => (empty($donationAmountIncrement) ? 0.01 : $donationAmountIncrement), 'data_type' => 'decimal'));
 	$donationMinAmount = get_post_meta($thepostid, '_donation_min_amount', true);
-	woocommerce_wp_text_input(array('id' => 'donation_min_amount', 'label' => esc_html__('Min amount', 'donations-for-woocommerce'), 'value' => (empty($donationMinAmount) ? get_post_meta($thepostid, '_price', true) : $donationMinAmount), 'data_type' => 'decimal'));
+	woocommerce_wp_text_input(array('id' => 'donation_min_amount', 'label' => esc_html__('Min amount (£)', 'donations-for-woocommerce'), 'value' => (empty($donationMinAmount) ? get_post_meta($thepostid, '_price', true) : $donationMinAmount), 'data_type' => 'decimal'));
+	$donationMaxAmount = get_post_meta($thepostid, '_donation_max_amount', true);
+	woocommerce_wp_text_input(array('id' => 'donation_max_amount', 'label' => esc_html__('Max amount (£)', 'donations-for-woocommerce'), 'value' => (empty($donationMaxAmount) ? 50.00 : $donationMaxAmount), 'data_type' => 'decimal'));
 	echo('</div>');
 }
 
@@ -182,6 +194,7 @@ function hm_wcdon_process_product_meta($productId) {
 	update_post_meta($productId, '_regular_price', $price);
 	update_post_meta($productId, '_donation_amount_increment', (!empty($_POST['donation_amount_increment']) && is_numeric($_POST['donation_amount_increment']) ? number_format($_POST['donation_amount_increment'], 2, '.', '') : 0.01));
 	update_post_meta($productId, '_donation_min_amount', (!empty($_POST['donation_min_amount']) && is_numeric($_POST['donation_min_amount']) ? number_format($_POST['donation_min_amount'], 2, '.', '') : get_post_meta($productId, '_price', true)));
+	update_post_meta($productId, '_donation_max_amount', (!empty($_POST['donation_max_amount']) && is_numeric($_POST['donation_max_amount']) ? number_format($_POST['donation_max_amount'], 2, '.', '') : 50.00));
 }
 
 // Process donation amount when a Donation product is added to the cart
