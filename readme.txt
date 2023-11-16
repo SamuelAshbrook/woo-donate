@@ -2,8 +2,8 @@
 Contributors: aspengrovestudios, annaqq, samuelashbrook
 Tags: woocommerce, donations, donation, donate, fundraising, giving, charity, non-profit, nonprofit, ecommerce
 Requires at least: 3.5
-Tested up to: 6.1.1
-Stable tag: 1.1.10
+Tested up to: 6.3.2
+Stable tag: 1.1.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -23,6 +23,9 @@ The Donations for WooCommerce plugin facilitates acceptance of donations of vary
 Alternatively, you can manually upload the plugin to your wp-content/plugins directory.
 
 == Changelog ==
+
+= 1.1.11 =
+* Declare HPOS compatibility
 
 = 1.1.10 =
 * Security fix

@@ -2,14 +2,14 @@
 /**
  * Plugin Name: HoH Woo Donations
  * Description: Easily accept donations of varying amounts through the Hospices of Hope WooCommerce store.
- * Version: 1.1.10
+ * Version: 1.1.11
  * Author: Step3 Digital
  * Author URI: https://step3.digital
  * License: GNU General Public License version 3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
  * Text Domain: donations-for-woocommerce
  * Domain Path: /lang
- * WC tested up to: 7.8.0
+ * WC tested up to: 8.2.1
  */
 
 /*
@@ -303,5 +303,14 @@ function hm_variable_donation_admin_custom_js() {
 }
 
 add_action( 'admin_footer', 'hm_variable_donation_admin_custom_js' );
+
+
+// Declare HPOS compatibility.
+
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+       \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+} );
 
 ?>
